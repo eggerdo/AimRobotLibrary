@@ -4,18 +4,19 @@ import java.util.HashMap;
 
 import org.dobots.aim.AimProtocol;
 import org.dobots.aim.AimService;
-import org.dobots.lib.comm.msg.RoboCommands;
-import org.dobots.lib.comm.msg.RoboCommands.BaseCommand;
-import org.dobots.lib.comm.msg.RoboCommands.ControlCommand;
+import org.dobots.aim.command.IAimCommandListener;
+import org.dobots.comm.msg.RoboCommands;
+import org.dobots.comm.msg.RoboCommands.BaseCommand;
+import org.dobots.comm.msg.RoboCommands.ControlCommand;
 import org.dobots.utilities.ThreadMessenger;
+import org.dobots.utilities.log.AndroidLogger;
+import org.dobots.utilities.log.Logger;
 import org.dobots.zmq.ZmqHandler;
 import org.dobots.zmq.video.FpsCounter;
 import org.dobots.zmq.video.IFpsListener;
 import org.dobots.zmq.video.IRawVideoListener;
 import org.dobots.zmq.video.VideoThrottle;
 import org.dobots.zmq.video.ZmqVideoReceiver;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.zeromq.ZMQ;
 
 import robots.remote.RobotServiceBinder;
@@ -96,16 +97,17 @@ public abstract class AimRobotService extends AimService implements IRawVideoLis
 		super.onCreate();
 		
 		ZmqHandler.initialize(this);
+		Logger.setLogger(new AndroidLogger());
 		
 		mVideoThrottle = new VideoThrottle("videoThrottle");
 		mVideoThrottle.setRawVideoListener(this);
 		mVideoThrottle.setFrameRate(20.0);
 
 		mCounter = new FpsCounter(new IFpsListener() {
-			
+		
 			@Override
-			public void onFPS(int i_nFPS) {
-				Log.d("debug", "fps: " + i_nFPS);
+			public void onFPS(double i_nFPS) {
+				Log.d("debug", "fps: %1f" + i_nFPS);
 			}
 		});
 	}
@@ -125,24 +127,13 @@ public abstract class AimRobotService extends AimService implements IRawVideoLis
 
 		ZmqHandler.destroyInstance();
 	}
-	
 
 	@Override
 	public void onFrame(byte[] rgb, int rotation) {
 		if (getOutMessenger("video") != null) {
 			String base64 = android.util.Base64.encodeToString(rgb, android.util.Base64.NO_WRAP);
-			
-			JSONObject json = new JSONObject();
-			try {
-				json.put("base64", base64);
-				json.put("rotation", rotation);
-
-				mAimConnectionHelper.sendData(getOutMessenger("video"), json.toString());
-				mCounter.tick();
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			mAimConnectionHelper.sendData(getOutMessenger("video"), base64);
+			mCounter.tick();
 		}
 	}
 
