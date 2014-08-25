@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.dobots.aim.AimProtocol;
 import org.dobots.aim.AimService;
-import org.dobots.aim.command.IAimCommandListener;
+//import org.dobots.aim.command.IAimCommandListener;
 import org.dobots.comm.msg.RoboCommands;
 import org.dobots.comm.msg.RoboCommands.BaseCommand;
 import org.dobots.comm.msg.RoboCommands.ControlCommand;
