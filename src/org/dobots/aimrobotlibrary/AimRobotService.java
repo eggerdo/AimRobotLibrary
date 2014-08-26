@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import org.dobots.aim.AimProtocol;
 import org.dobots.aim.AimService;
-import org.dobots.aim.command.IAimCommandListener;
 import org.dobots.comm.msg.RoboCommands;
 import org.dobots.comm.msg.RoboCommands.BaseCommand;
 import org.dobots.comm.msg.RoboCommands.ControlCommand;
@@ -31,7 +30,7 @@ public abstract class AimRobotService extends AimService implements IRawVideoLis
 	
 	private static final String TAG = "RobotService";
 	
-	private RobotServiceBinder mRobot;
+	protected RobotServiceBinder mRobot;
 	
 	// a ThreadMessenger is a thread with a messenger. messages are
 	// handled by that thread
@@ -59,7 +58,7 @@ public abstract class AimRobotService extends AimService implements IRawVideoLis
 	protected void handleData(BaseCommand cmd) {
 		try {
 			if ((cmd instanceof ControlCommand) && ((ControlCommand)cmd).mCommand.equals("setFrameRate")) {
-				mVideoThrottle.setFrameRate((Double)((ControlCommand)cmd).getParameter(0));
+				setFrameRate((Double)((ControlCommand)cmd).getParameter(0));
 			} else {
 				mRobot.handleCommand(cmd);
 			}
@@ -150,6 +149,10 @@ public abstract class AimRobotService extends AimService implements IRawVideoLis
 
 	protected RobotServiceBinder getRobot() {
 		return mRobot;
+	}
+	
+	public void setFrameRate(double rate) {
+		mVideoThrottle.setFrameRate(rate);
 	}
 
 }
